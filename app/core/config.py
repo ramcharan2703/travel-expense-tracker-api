@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     PORT: int = 8000
     HOST: str = "0.0.0.0"
 
+    # CORS settings
+    CORS_ORIGINS: str = ""
+
     # Logging settings
     LOG_LEVEL: str = "INFO"
 
