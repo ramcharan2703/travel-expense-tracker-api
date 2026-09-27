@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 from pymongo import MongoClient
 from pymongo.database import Database
@@ -5,6 +6,11 @@ from pymongo.errors import ConnectionFailure, PyMongoError, ServerSelectionTimeo
 
 from app.core.config import settings
 from app.core.logging import logger
+
+
+def _mask_uri(uri: str) -> str:
+    """Masks credentials in MongoDB connection URI for safe logging."""
+    return re.sub(r"://([^:]+):([^@]+)@", r"://\1:****@", uri)
 
 
 class DatabaseManager:
@@ -17,7 +23,7 @@ class DatabaseManager:
     def connect(self) -> None:
         """Establishes connection to MongoDB using configured URI."""
         try:
-            logger.info("Connecting to MongoDB at %s...", settings.MONGODB_URI)
+            logger.info("Connecting to MongoDB at %s...", _mask_uri(settings.MONGODB_URI))
             self.client = MongoClient(
                 settings.MONGODB_URI,
                 serverSelectionTimeoutMS=3000,
@@ -32,7 +38,7 @@ class DatabaseManager:
         except (ServerSelectionTimeoutError, ConnectionFailure) as exc:
             logger.warning(
                 "MongoDB is currently unreachable at %s: %s. The app will run, but database operations will fail until MongoDB is started.",
-                settings.MONGODB_URI,
+                _mask_uri(settings.MONGODB_URI),
                 exc,
             )
         except PyMongoError as exc:
@@ -54,7 +60,7 @@ class DatabaseManager:
             self.connect()
         if self.db is None:
             raise ConnectionFailure(
-                f"Cannot connect to MongoDB at '{settings.MONGODB_URI}'. Ensure MongoDB is running."
+                "Cannot connect to MongoDB. Ensure MongoDB is running and the database configuration is correct."
             )
         return self.db
 

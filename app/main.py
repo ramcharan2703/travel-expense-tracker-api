@@ -125,8 +125,8 @@ async def mongo_exception_handler(request: Request, exc: PyMongoError) -> JSONRe
             "success": False,
             "error": {
                 "code": "DATABASE_UNAVAILABLE",
-                "message": "Cannot connect to MongoDB. Please ensure the MongoDB server is running or check your MONGODB_URI in .env.",
-                "details": {"uri": settings.MONGODB_URI, "reason": str(exc)},
+                "message": "Database service is temporarily unavailable. Please try again later.",
+                "details": None,
             },
         },
     )
